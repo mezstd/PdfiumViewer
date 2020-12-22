@@ -37,7 +37,27 @@ namespace PdfiumViewer
         private PdfViewerCursorMode _cursorMode = PdfViewerCursorMode.Pan;
         private bool _isSelectingText = false;
         private MouseState _cachedMouseState = null;
-        private TextSelectionState _textSelectionState = null;
+
+        private TextSelectionState _selectionState = null;
+
+        private TextSelectionState SelectionState
+        {
+            get
+            {
+                return _selectionState;
+            }
+
+            set
+            {
+                if (_selectionState == value)
+                {
+                    return;
+                }
+
+                _selectionState = value;
+                SelectionChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
 
         /// <summary>
         /// The associated PDF document.
@@ -171,7 +191,7 @@ namespace PdfiumViewer
         {
             get
             {
-                var state = _textSelectionState?.GetNormalized();
+                var state = SelectionState?.GetNormalized();
                 if (state == null)
                     return false;
 
@@ -189,7 +209,7 @@ namespace PdfiumViewer
         {
             get
             {
-                var state = _textSelectionState?.GetNormalized();
+                var state = SelectionState?.GetNormalized();
                 if (state == null)
                     return null;
 
@@ -495,7 +515,7 @@ namespace PdfiumViewer
 
         public void SelectAll()
         {
-            _textSelectionState = new TextSelectionState()
+            SelectionState = new TextSelectionState()
             {
                 StartPage = 0,
                 StartIndex = 0,
@@ -508,7 +528,7 @@ namespace PdfiumViewer
 
         public void UnselectAll()
         {
-            _textSelectionState = new TextSelectionState();
+            SelectionState = new TextSelectionState();
             Invalidate();
         }
 
@@ -551,7 +571,7 @@ namespace PdfiumViewer
             _height = 0;
             _maxWidth = 0;
             _maxHeight = 0;
-            _textSelectionState = null;
+            SelectionState = null;
 
             foreach (var size in Document.PageSizes)
             {
@@ -799,7 +819,7 @@ namespace PdfiumViewer
 
                     DrawMarkers(e.Graphics, page);
 
-                    var selectionInfo = _textSelectionState;
+                    var selectionInfo = SelectionState;
                     if (selectionInfo != null)
                         DrawTextSelection(e.Graphics, page, selectionInfo.GetNormalized());
                 }
@@ -1048,7 +1068,7 @@ namespace PdfiumViewer
 
             if (characterIndex >= 0)
             {
-                _textSelectionState = new TextSelectionState()
+                SelectionState = new TextSelectionState()
                 {
                     StartPage = pdfLocation.Page,
                     StartIndex = characterIndex,
@@ -1062,7 +1082,7 @@ namespace PdfiumViewer
             {
                 _isSelectingText = false;
                 Capture = false;
-                _textSelectionState = null;
+                SelectionState = null;
             }
         }
 
@@ -1085,8 +1105,8 @@ namespace PdfiumViewer
 
             if (mouseState.CharacterIndex >= 0)
             {
-                _textSelectionState.EndPage = mouseState.PdfLocation.Page;
-                _textSelectionState.EndIndex = mouseState.CharacterIndex;
+                SelectionState.EndPage = mouseState.PdfLocation.Page;
+                SelectionState.EndIndex = mouseState.CharacterIndex;
 
                 Invalidate();
             }
@@ -1100,7 +1120,7 @@ namespace PdfiumViewer
 
             if (Document.GetWordAtPosition(pdfLocation, 4f, 4f, out var word))
             {
-                _textSelectionState = new TextSelectionState()
+                SelectionState = new TextSelectionState()
                 {
                     StartPage = pdfLocation.Page,
                     EndPage = pdfLocation.Page,
@@ -1155,6 +1175,13 @@ namespace PdfiumViewer
         [Category("Action")]
         [Description("Occurs when the PDF document content is loaded.")]
         public event EventHandler DocumentLoaded;
+
+        /// <summary>
+        /// Occurs when the PDF document selection is changed.
+        /// </summary>
+        [Category("Action")]
+        [Description("Occurs when the PDF document selection is changed.")]
+        public event EventHandler SelectionChanged;
 
         /// <summary>
         /// Called when a link is clicked.
@@ -1384,7 +1411,7 @@ namespace PdfiumViewer
             public int CharacterIndex { get; set; }
         }
 
-        private class TextSelectionState
+        private class TextSelectionState : IEquatable<TextSelectionState>
         {
             public int StartPage { get; set; }
             public int StartIndex { get; set; }
@@ -1412,6 +1439,49 @@ namespace PdfiumViewer
                 }
 
                 return this;
+            }
+
+            public bool Equals(TextSelectionState other)
+            {
+                if (ReferenceEquals(null, other)) return false;
+                if (ReferenceEquals(this, other)) return true;
+
+                return StartPage == other.StartPage
+                       && StartIndex == other.StartIndex
+                       && EndPage == other.EndPage
+                       && EndIndex == other.EndIndex;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+
+                if (obj.GetType() != GetType()) return false;
+
+                return Equals((TextSelectionState) obj);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    var hashCode = StartPage;
+                    hashCode = (hashCode * 397) ^ StartIndex;
+                    hashCode = (hashCode * 397) ^ EndPage;
+                    hashCode = (hashCode * 397) ^ EndIndex;
+                    return hashCode;
+                }
+            }
+
+            public static bool operator ==(TextSelectionState left, TextSelectionState right)
+            {
+                return Equals(left, right);
+            }
+
+            public static bool operator !=(TextSelectionState left, TextSelectionState right)
+            {
+                return !Equals(left, right);
             }
         }
     }
