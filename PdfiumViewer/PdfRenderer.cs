@@ -509,7 +509,16 @@ namespace PdfiumViewer
 
             SetDisplayRectLocation(new Point(0, 0));
 
+            Repainted -= OnLoadDocumentRepainted;
+            Repainted += OnLoadDocumentRepainted;
+
             ReloadDocument();
+        }
+
+        private void OnLoadDocumentRepainted(object target, EventArgs args)
+        {
+            DocumentLoaded?.Invoke(target, EventArgs.Empty);
+            Repainted -= OnLoadDocumentRepainted;
         }
 
         private void ReloadDocument()
@@ -775,6 +784,8 @@ namespace PdfiumViewer
                 _visiblePageStart = 0;
             if (_visiblePageEnd == -1)
                 _visiblePageEnd = Document.PageCount - 1;
+
+            Repainted?.Invoke(this, EventArgs.Empty);
         }
 
         private void DrawTextSelection(Graphics graphics, int page, TextSelectionState state)
@@ -1105,6 +1116,20 @@ namespace PdfiumViewer
         [Category("Action")]
         [Description("Occurs when a link in the pdf document is clicked.")]
         public event LinkClickEventHandler LinkClick;
+
+        /// <summary>
+        /// Occurs when the PDF document content is repainted.
+        /// </summary>
+        [Category("Action")]
+        [Description("Occurs when the PDF document content is repainted.")]
+        public event EventHandler Repainted;
+
+        /// <summary>
+        /// Occurs when the PDF document content is loaded.
+        /// </summary>
+        [Category("Action")]
+        [Description("Occurs when the PDF document content is loaded.")]
+        public event EventHandler DocumentLoaded;
 
         /// <summary>
         /// Called when a link is clicked.
