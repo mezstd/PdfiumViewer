@@ -26,6 +26,7 @@ namespace PdfiumViewer.Demo
 
             pdfViewer1.Renderer.MouseMove += Renderer_MouseMove;
             pdfViewer1.Renderer.MouseLeave += Renderer_MouseLeave;
+            pdfViewer1.Renderer.SelectionChanged += Renderer_SelectionChanged;
             pdfViewer1.Renderer.CursorMode = PdfViewerCursorMode.TextSelection;
 
             ShowPdfLocation(PdfPoint.Empty);
@@ -35,6 +36,23 @@ namespace PdfiumViewer.Demo
             _zoom.Text = pdfViewer1.Renderer.Zoom.ToString();
 
             Disposed += (s, e) => pdfViewer1.Document?.Dispose();
+        }
+
+        private void Renderer_SelectionChanged(object obj, EventArgs args)
+        {
+            string selectedText = pdfViewer1.Renderer.SelectedText;
+            if (string.IsNullOrEmpty(selectedText))
+            {
+                _selectedTextValue.Text = "<no selection>";
+                return;
+            }
+
+            if (selectedText.Length > 30)
+            {
+                selectedText = selectedText.Substring(0, 30) + "...";
+            }
+
+            this._selectedTextValue.Text = selectedText.Replace('\n', ' ').Replace('\r', ' ');
         }
 
         private void Renderer_MouseLeave(object sender, EventArgs e)

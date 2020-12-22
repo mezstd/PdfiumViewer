@@ -528,7 +528,7 @@ namespace PdfiumViewer
 
         public void UnselectAll()
         {
-            SelectionState = new TextSelectionState();
+            SelectionState = null;
             Invalidate();
         }
 
@@ -1072,8 +1072,8 @@ namespace PdfiumViewer
                 {
                     StartPage = pdfLocation.Page,
                     StartIndex = characterIndex,
-                    EndPage = -1,
-                    EndIndex = -1
+                    EndPage = pdfLocation.Page,
+                    EndIndex = characterIndex,
                 };
                 _isSelectingText = true;
                 Capture = true;
@@ -1105,8 +1105,16 @@ namespace PdfiumViewer
 
             if (mouseState.CharacterIndex >= 0)
             {
+                var originEndPage = SelectionState.EndPage;
+                var originEndIndex = SelectionState.EndIndex;
+
                 SelectionState.EndPage = mouseState.PdfLocation.Page;
                 SelectionState.EndIndex = mouseState.CharacterIndex;
+
+                if (originEndPage != SelectionState.EndPage || originEndIndex != SelectionState.EndIndex)
+                {
+                    SelectionChanged?.Invoke(this, EventArgs.Empty);
+                }
 
                 Invalidate();
             }
