@@ -75,16 +75,19 @@ namespace PdfiumViewer
                 for (int page = 0; page < Document.PageSizes.Count; page++)
                 {
                     var pageCache = _pageCache[page].OuterBounds;
-                    if (top - 10 < pageCache.Top)
-                    {
-                        // If more than 50% of the page is hidden, return the previous page.
+                    if (top - 10 >= pageCache.Top) continue;
 
-                        int hidden = pageCache.Bottom - bottom;
-                        if (hidden > 0 && (double)hidden / pageCache.Height > 0.5 && page > 0)
-                            return page - 1;
+                    // If the page occupies less than 50% of the display area, return the previous page.
+                    int areaHeight = bottom - top;
+                    int pageTopOffset = Math.Max(pageCache.Top - top, 0);
+                    int pageBottomOffset = Math.Max(bottom - pageCache.Bottom, 0);
 
-                        return page;
-                    }
+                    int pageVisibleHeight = areaHeight - pageTopOffset - pageBottomOffset;
+
+                    if (areaHeight > 0 && (double)pageVisibleHeight / areaHeight < 0.5 && page > 0)
+                        return page - 1;
+
+                    return page;
                 }
 
                 return Document.PageCount - 1;
