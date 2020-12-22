@@ -233,6 +233,22 @@ namespace PdfiumViewer
             Markers.CollectionChanged += Markers_CollectionChanged;
         }
 
+        public PdfRenderer(string pdfiumDirectoryPath) : this()
+        {
+            if (string.IsNullOrEmpty(pdfiumDirectoryPath))
+            {
+                throw new ArgumentException(
+                    "You should provide a path to directory containing the pdfium.dll library.",
+                    nameof(pdfiumDirectoryPath));
+            }
+
+            if (!NativeMethods.TryLoadNativeLibrary(pdfiumDirectoryPath))
+            {
+                throw new TypeLoadException(
+                    $"Could not find the necessary pdfium.dll library in the following folder: {pdfiumDirectoryPath}.");
+            }
+        }
+
         private void Markers_CollectionChanged(object sender, EventArgs e)
         {
             RedrawMarkers();

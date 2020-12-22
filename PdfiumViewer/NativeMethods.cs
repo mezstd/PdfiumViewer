@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
@@ -23,11 +24,25 @@ namespace PdfiumViewer
 
             // Load the platform dependent Pdfium.dll if it exists.
 
-            if (!TryLoadNativeLibrary(AppDomain.CurrentDomain.RelativeSearchPath))
-                TryLoadNativeLibrary(Path.GetDirectoryName(typeof(NativeMethods).Assembly.Location));
+            var executableDomainFolder = AppDomain.CurrentDomain.RelativeSearchPath;
+            if (TryLoadNativeLibrary(executableDomainFolder))
+            {
+                return;
+            }
+
+            var pdfiumViewerFolder = Path.GetDirectoryName(typeof(NativeMethods).Assembly.Location);
+            if (TryLoadNativeLibrary(pdfiumViewerFolder))
+            {
+                return;
+            }
+
+            var uriCodeBase = new Uri(Assembly.GetExecutingAssembly().CodeBase);
+            var clickOnceFolder = Path.GetDirectoryName(uriCodeBase.LocalPath.ToString());
+
+            TryLoadNativeLibrary(clickOnceFolder);
         }
 
-        private static bool TryLoadNativeLibrary(string path)
+        public static bool TryLoadNativeLibrary(string path)
         {
             if (path == null)
                 return false;
