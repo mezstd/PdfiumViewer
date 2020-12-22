@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>PdfiumViewer</id>
+    <id>PdfiumViewer.Ext</id>
     <version>$version$</version>
     <title>PdfiumViewer</title>
-    <authors>Pieter van Ginkel</authors>
-    <owners>Pieter van Ginkel</owners>
+    <authors>Pieter van Ginkel,Sergey Shaldanov</authors>
+    <owners>Sergey Shaldanov</owners>
     <licenseUrl>https://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
-    <projectUrl>http://github.com/pvginkel/PdfiumViewer</projectUrl>
+    <projectUrl>https://github.com/serge-shaldanov/PdfiumViewer</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>PDF viewer based on the PDFium project.</description>
-    <copyright>Pieter van Ginkel © 2012-2015</copyright>
+    <description>PDF viewer based on the PDFium project. This is a fork of the original project https://github.com/pvginkel/PdfiumViewer created by Pieter van Ginkel. I fixed some bugs and added the ability to select text in the PdfRenderer component (all thanks to https://github.com/sschim).</description>
+    <copyright>Pieter van Ginkel © 2012-2015, Sergey Shaldanov © 2020</copyright>
     <tags>pdf viewer pdfium</tags>
   </metadata>
   <files>
