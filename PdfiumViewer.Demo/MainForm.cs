@@ -26,6 +26,8 @@ namespace PdfiumViewer.Demo
 
             pdfViewer1.Renderer.MouseMove += Renderer_MouseMove;
             pdfViewer1.Renderer.MouseLeave += Renderer_MouseLeave;
+            pdfViewer1.Renderer.CursorMode = PdfViewerCursorMode.TextSelection;
+
             ShowPdfLocation(PdfPoint.Empty);
 
             cutMarginsWhenPrintingToolStripMenuItem.PerformClick();
@@ -394,6 +396,11 @@ namespace PdfiumViewer.Demo
         private void pdfViewerContextMenu_Opening(object sender, CancelEventArgs e)
         {
             copyToolStripMenuItem.Enabled = pdfViewer1.Renderer.IsTextSelected;
+        }
+
+        private void unselectAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            pdfViewer1.Renderer.UnselectAll();
         }
     }
 }

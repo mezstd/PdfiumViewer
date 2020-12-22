@@ -506,6 +506,12 @@ namespace PdfiumViewer
             Invalidate();
         }
 
+        public void UnselectAll()
+        {
+            _textSelectionState = new TextSelectionState();
+            Invalidate();
+        }
+
         public void CopySelection()
         {
             var text = SelectedText;
