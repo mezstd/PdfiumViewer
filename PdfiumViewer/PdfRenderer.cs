@@ -1166,28 +1166,17 @@ namespace PdfiumViewer
         /// <param name="focus">The location to focus on.</param>
         protected override void SetZoom(double zoom, Point? focus)
         {
-            Point location;
+            var bounds = GetDocumentBounds();
 
-            if (focus.HasValue)
+            if (!focus.HasValue)
             {
-                var bounds = GetDocumentBounds();
-
-                location = new Point(
-                    focus.Value.X - bounds.X,
-                    focus.Value.Y - bounds.Y
-                );
+                focus = new Point(bounds.X, bounds.Y);
             }
-            else
-            {
-                var bounds = _pageCacheValid
-                    ? _pageCache[Page].Bounds
-                    : GetDocumentBounds();
 
-                location = new Point(
-                    bounds.X,
-                    bounds.Y
-                );
-            }
+            var location = new Point(
+                focus.Value.X - bounds.X,
+                focus.Value.Y - bounds.Y
+            );
 
             double oldScale = Zoom;
 
