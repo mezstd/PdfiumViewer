@@ -13,6 +13,10 @@ namespace PdfiumViewer
     /// </summary>
     public class PdfRenderer : PanningZoomingScrollControl
     {
+        private const double SELECTION_TOLERANCE_X = 0;
+
+        private const double SELECTION_TOLERANCE_Y = 20;
+
         private static readonly Padding PageMargin = new Padding(4);
         private static readonly SolidBrush _textSelectionBrush = new SolidBrush(Color.FromArgb(90, Color.DodgerBlue));
 
@@ -39,6 +43,22 @@ namespace PdfiumViewer
         private MouseState _cachedMouseState = null;
 
         private TextSelectionState _selectionState = null;
+
+        private double SelectionToleranceX
+        {
+            get
+            {
+                return SELECTION_TOLERANCE_X / Zoom;
+            }
+        }
+
+        private double SelectionToleranceY
+        {
+            get
+            {
+                return SELECTION_TOLERANCE_Y / Zoom;
+            }
+        }
 
         private TextSelectionState SelectionState
         {
@@ -1064,7 +1084,10 @@ namespace PdfiumViewer
             if (!pdfLocation.IsValid)
                 return;
 
-            var characterIndex = Document.GetCharacterIndexAtPosition(pdfLocation, 4f, 4f);
+            var characterIndex = Document.GetCharacterIndexAtPosition(
+                pdfLocation,
+                SelectionToleranceX,
+                SelectionToleranceY);
 
             if (characterIndex >= 0)
             {
@@ -1072,8 +1095,8 @@ namespace PdfiumViewer
                 {
                     StartPage = pdfLocation.Page,
                     StartIndex = characterIndex,
-                    EndPage = pdfLocation.Page,
-                    EndIndex = characterIndex,
+                    EndPage = -1,
+                    EndIndex = -1,
                 };
                 _isSelectingText = true;
                 Capture = true;
@@ -1126,7 +1149,7 @@ namespace PdfiumViewer
             if (!pdfLocation.IsValid)
                 return;
 
-            if (Document.GetWordAtPosition(pdfLocation, 4f, 4f, out var word))
+            if (Document.GetWordAtPosition(pdfLocation, SelectionToleranceX, SelectionToleranceY, out var word))
             {
                 SelectionState = new TextSelectionState()
                 {
@@ -1158,7 +1181,10 @@ namespace PdfiumViewer
             if (!_cachedMouseState.PdfLocation.IsValid)
                 return _cachedMouseState;
 
-            _cachedMouseState.CharacterIndex = Document.GetCharacterIndexAtPosition(_cachedMouseState.PdfLocation, 4f, 4f);
+            _cachedMouseState.CharacterIndex = Document.GetCharacterIndexAtPosition(
+                _cachedMouseState.PdfLocation,
+                SelectionToleranceX,
+                SelectionToleranceY);
 
             return _cachedMouseState;
         }
